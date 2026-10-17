@@ -2,8 +2,13 @@ using UnityEngine;
 
 public class Coin : MonoBehaviour
 {
+    public enum CoinKind { Normal, Red, Blue }
+
+    [SerializeField] CoinKind kind = CoinKind.Normal;
     [SerializeField] int value = 1;
     [SerializeField] float spinSpeed = 90f;
+
+    bool collected = false;
 
     void Update()
     {
@@ -12,12 +17,25 @@ public class Coin : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"Coin touched by {other.name}");
+        if (collected || !other.CompareTag("Player")) return;
 
-        if (other.CompareTag("Player"))
+        collected = true; // Prevent the same coin from registering twice.
+
+        switch (kind)
         {
-            GameManager.Instance.AddScore(value);
-            Destroy(gameObject);
+            case CoinKind.Normal:
+                GameManager.Instance.AddScore(value);
+                break;
+
+            case CoinKind.Red:
+                GameManager.Instance.CollectRedCoin();
+                break;
+
+            case CoinKind.Blue:
+                GameManager.Instance.CollectBlueCoin();
+                break;
         }
+
+        Destroy(gameObject);
     }
 }
